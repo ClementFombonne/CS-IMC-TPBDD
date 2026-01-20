@@ -1,0 +1,50 @@
+name,description,query,id,parentId,isFolder
+q1,,,0,,true
+Create artist,,"CREATE (Value:Artist {primaryName: 'Clément Fombonne', birthYear: 2003, idArtist: 1})",1,0,false
+Display artist by name,,"MATCH (a:Artist {primaryName: ""Clément Fombonne""})
+RETURN a",2,0,false
+q2,,,3,,true
+Create film,,"CREATE (Value:Film {primaryTitle: ""L'histoire de mon 20 au cours Infrastructure de donnees"", startYear: 2026, idFilm: 1})",4,3,false
+Display film by name,,"MATCH (f:Film {primaryTitle: ""L'histoire de mon 20 au cours Infrastructure de donnees""})
+RETURN f",5,3,false
+q3,,,6,,true
+Create ACTED_IN relationship,,"MATCH (a:Artist {idArtist: 1})
+MATCH (f:Film {idFilm: 1})
+CREATE (a)-[r:ACTED_IN]->(f)
+return type(r)",7,6,false
+q4,,,8,,true
+create 2 director,,"MATCH (target:Film {idFilm: 1})
+CREATE (n1:Artist {primaryName: ""Luc Vo Van""})-[:DIRECTED]->(target),
+       (n2:Artist {primaryName: ""Francesca Bugiotti""})-[:DIRECTED]->(target)",9,8,false
+q5,,,10,,true
+Query Nicole,,"MATCH (a:Artist {primaryName: ""Nicole Kidman""}) return a.primaryName, a.birthYear",11,10,false
+q6,,,12,,true
+Display all movies,,MATCH (n:Film) RETURN n;,13,12,false
+q7,,,14,,true
+Count artist born on 1963,,MATCH (a:Artist {birthYear: 1963}) return COUNT(a),15,14,false
+Display artist with more than one movies,,"MATCH (a:Artist)-[:acted_in]->(f:Film)
+WITH a, count(f) AS nombre_films
+WHERE nombre_films > 1
+RETURN a.primaryName, nombre_films",16,17,false
+q8,,,17,,true
+q9,,,18,,true
+Display artist with more than one role,,"MATCH (a:Artist)-[r]->(f:Film)
+WITH a, count(DISTINCT type(r)) AS nombre_roles, collect(DISTINCT type(r)) AS liste_roles
+WHERE nombre_roles > 1
+RETURN a.primaryName, nombre_roles, liste_roles",19,18,false
+Artist with more than one role in the same movie,,"MATCH (a:Artist)-[r]->(f:Film)
+WITH a, f, count(DISTINCT type(r)) AS nb_responsabilites, collect(DISTINCT type(r)) AS roles
+WHERE nb_responsabilites > 1
+RETURN a.primaryName AS Artiste, f.primaryTitle AS Film, roles
+ORDER BY nb_responsabilites DESC",20,21,false
+q10,,,21,,true
+q11,,,22,,true
+movie with max number of actor,,"MATCH (a:Artist)-[:acted_in]->(f:Film)
+WITH f, count(DISTINCT a) AS nb_acteurs_uniques
+// Etape 1 : Trouver le score maximum
+WITH max(nb_acteurs_uniques) AS max_acteurs
+// Etape 2 : Retrouver les films qui ont ce score
+MATCH (a:Artist)-[:acted_in]->(f:Film)
+WITH f, count(DISTINCT a) AS nb_acteurs_uniques, max_acteurs
+WHERE nb_acteurs_uniques = max_acteurs
+RETURN f.primaryTitle, nb_acteurs_uniques",23,22,false
